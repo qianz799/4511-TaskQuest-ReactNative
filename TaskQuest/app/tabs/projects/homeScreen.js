@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Button, Switch, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-const HomeScreen = ({ navigation }) => {
+
+export default function HomeScreen() {
   // State to manage the current mode (Clean Mode or Gamification Mode)
   const [isCleanMode, setIsCleanMode] = useState(false);
+  const router = useRouter();
+
 
   // Example data for recent projects
   const recentProjects = [
@@ -61,7 +65,7 @@ const HomeScreen = ({ navigation }) => {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.projectCard}
-              onPress={() => navigation.navigate('projectView', { projectId: item.id })}
+              onPress={() => router.push(`/tabs/projects/projectView/${item.id}`)}
             >
               <Text style={styles.projectName}>{item.name}</Text>
               <Text>Tasks Due: {item.tasksDue}</Text>
@@ -89,7 +93,7 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.taskHeader}>
                 <TouchableOpacity
                   style={styles.roundCheckbox}
-                  onPress={() => navigation.navigate('gameScreen')}
+                  onPress={() => router.push('/tabs/game')}
                 />
                 <View style={styles.taskContent}>
                   <Text style={styles.taskName}>{item.name}</Text>
@@ -115,7 +119,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Add Button for Creating New Tasks */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('create')}
+        onPress={() => router.push('/tabs/projects/create')}
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
@@ -199,4 +203,4 @@ const styles = StyleSheet.create({
   addButtonText: { color: '#fff', fontSize: 40 },
 });
 
-export default HomeScreen;
+
