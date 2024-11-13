@@ -1,5 +1,5 @@
-import { Text } from "react-native";
+import HomeScreen from './projects/homeScreen'; 
 
-export default function RegisterScreen() {
-  return <Text>This is the home screen</Text>
+export default function Index() {
+  return <HomeScreen />; // navigates to homescreen 
 }
