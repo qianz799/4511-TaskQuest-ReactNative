@@ -1,9 +1,15 @@
 import { Tabs } from 'expo-router';
 import { Entypo } from '@expo/vector-icons'; 
+import { StyleSheet } from 'react-native';
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: styles.tabBar,
+      }}
+    >
       <Tabs.Screen
         name='index'
         options={{
@@ -43,3 +49,13 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    position: 'absolute', 
+    bottom: 0, 
+    height: 35, // change height if need to
+    paddingBottom: 0, 
+    paddingTop: 5, 
+  },
+});
