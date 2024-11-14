@@ -34,7 +34,7 @@ export default function ProjectView() {
               style={styles.taskCard}
               onPress={() => router.push({
                 pathname: 'tabs/projects/taskView',
-                params: { taskId: item.id }
+                params: { id: item.id, title: item.title, description: item.description, dueDate: item.dueDate, taskStatus: item.status}
               })}
 >
 <View style={styles.taskInfo}>

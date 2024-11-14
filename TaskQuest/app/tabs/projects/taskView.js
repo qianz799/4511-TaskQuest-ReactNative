@@ -2,12 +2,16 @@ import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
  
 export default function ProjectView() {
-  const { id, title, description, tasks } = useLocalSearchParams();
+  const { id, title, description, dueDate, taskStatus } = useLocalSearchParams();
   const router = useRouter();
  
   return (
 <View style={styles.container}>
 <Text>Hi</Text>
+<Text>{title}</Text>
+<Text>{description}</Text>
+<Text>{dueDate}</Text>
+<Text>{taskStatus}</Text>
 </View>
   );
 }
