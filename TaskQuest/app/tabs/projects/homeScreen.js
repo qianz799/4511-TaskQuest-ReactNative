@@ -65,7 +65,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.projectCard}
-              onPress={() => router.push(`/tabs/projects/projectView/${item.id}`)}
+              onPress={() => router.push({ pathname: '/tabs/projects/projectView', params: { projectId: item.id }})}
             >
               <Text style={styles.projectName}>{item.name}</Text>
               <Text>Tasks Due: {item.tasksDue}</Text>
