@@ -12,18 +12,21 @@
 
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
+    const router = useRouter();
   return (
     <View style={styles.container}>
       {/* Logo Text */}
       <Text style={styles.logoText}>TaskQuest</Text>
 
       {/* Login Button */}
-      <TouchableOpacity style={styles.button}>
-        <Link href="./tabs" style={styles.buttonText}>
-          Login
-        </Link>
+       <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('./signin')}
+      >
+        <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
       {/* Alternative Sign-in Options */}
