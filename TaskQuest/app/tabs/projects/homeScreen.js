@@ -1,10 +1,12 @@
+// displayUI elements: mode toggle, recent projects, upcoming tasks
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Button, Switch, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Button, Switch, StyleSheet, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import CreateTask from './createTask'; // Import the CreateTask component
 
 
-export default function HomeScreen() {
+export default function HomeScreen({ onCreateTask }) {
   // State to manage the current mode (Clean Mode or Gamification Mode)
   const [isCleanMode, setIsCleanMode] = useState(false);
   const router = useRouter();
@@ -67,6 +69,7 @@ export default function HomeScreen() {
               style={styles.projectCard}
               onPress={() => router.push({ pathname: '/tabs/projects/projectView', params: { projectId: item.id }})}
             >
+
               <Text style={styles.projectName}>{item.name}</Text>
               <Text>Tasks Due: {item.tasksDue}</Text>
               {/* Custom progress bar representation */}
@@ -116,10 +119,10 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* Add Button for Creating New Tasks */}
+      Add Button for Creating New Tasks
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => router.push('/tabs/projects/create')}
+        onPress={onCreateTask}
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
