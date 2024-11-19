@@ -89,7 +89,7 @@ export default function RegisterScreen() {
       {/* Create Account Button */}
       <TouchableOpacity
         style={styles.createButton}
-        onPress={() => router.push('/tabs/projects/homeScreen')} // Navigate to the home page
+        onPress={() => router.push('./eula')} // Navigate to the home page
       >
         <Text style={styles.createButtonText}>Create a new Account</Text>
       </TouchableOpacity>
