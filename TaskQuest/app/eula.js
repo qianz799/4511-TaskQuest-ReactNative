@@ -64,7 +64,7 @@ export default function TermsAndConditionsScreen() {
         disabled={!isChecked}
         onPress={() => {
           // Handle "Next" button press here
-          router.push('/tabs/projects/homeScreen')
+          router.push('./tutorial1')
         }}
       >
         <Text
