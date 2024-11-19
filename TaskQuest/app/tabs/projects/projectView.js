@@ -1,10 +1,16 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import TaskSummary from "../../../components/taskSummary";
+import { useLayoutEffect } from "react";
  
 export default function ProjectView() {
   const { id, title, description, tasks } = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({title: title})
+  }, [navigation])
  
   return (
 <View style={styles.container}>

@@ -1,7 +1,7 @@
 // manage navigation: open modals, create tasks, manage the state of the home screen
 import React, { useState } from "react";
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
  
 export default function ProjectsScreen() {
   const router = useRouter();
