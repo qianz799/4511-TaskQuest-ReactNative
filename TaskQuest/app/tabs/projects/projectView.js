@@ -61,7 +61,7 @@ export default function ProjectView() {
           data={taskData.filter(task => task.complete)}
           renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
           )}
-        />
+/>
 </View>
 </View>
   );
