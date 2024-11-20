@@ -20,7 +20,7 @@ export default function App() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/tabs/projects/homeScreen')}
+        onPress={() => router.push('/tabs')}
       >
         <Text style={styles.buttonText}>Skip Tutorial</Text>
       </TouchableOpacity>

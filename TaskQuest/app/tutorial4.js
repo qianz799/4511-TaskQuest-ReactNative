@@ -8,7 +8,7 @@ export default function App() {
     <View style={styles.container}>
       {/* Tutorial Header */}
       <TouchableOpacity style={styles.endTutorial}
-       onPress={() => router.push('/tabs/projects/homeScreen')}
+       onPress={() => router.push('/tabs')}
       >
         <Text style={styles.linkText}>End Tutorial</Text>
       </TouchableOpacity>
