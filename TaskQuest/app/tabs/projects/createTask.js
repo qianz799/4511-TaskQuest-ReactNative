@@ -1,9 +1,44 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 import TaskForm from '../../../components/TaskForm';
+import TaskBreakdownScreen from './AIBreakdown';
+import { generateTaskBreakdown } from '../../services/gemini';
 
 export default function CreateTask({ onClose, projectId }) {
   const [taskType, setTaskType] = useState('manual'); // 'manual' or 'ai'
+  const [prompt, setPrompt] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [generatedTasks, setGeneratedTasks] = useState([]);
+
+  const generateTasks = async () => {
+    setIsLoading(true);
+    try {
+      const tasks = await generateTaskBreakdown(prompt);
+      if (!Array.isArray(tasks)) {
+        throw new Error('Response is not an array');
+      }
+      setGeneratedTasks(tasks);
+      setShowBreakdown(true);
+    } catch (error) {
+      console.error('Gemini API Error:', error.response?.data || error.message);
+      alert(error.response?.data?.error?.message || 'Failed to generate tasks');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (showBreakdown) {
+    return (
+      <TaskBreakdownScreen 
+        tasks={generatedTasks}
+        prompt={prompt}
+        onClose={onClose}
+        projectId={projectId}
+        onCancel={() => setShowBreakdown(false)}
+      />
+    );
+  }
 
   return (
     <View style={styles.modalOverlay}>
@@ -40,16 +75,21 @@ export default function CreateTask({ onClose, projectId }) {
         ) : (
           <View style={styles.aiForm}>
             <TextInput
+              value={prompt}
+              onChangeText={setPrompt}
               placeholder="What task would you like AI to break down?"
               placeholderTextColor="#999"
               style={styles.aiInput}
               multiline
             />
             <TouchableOpacity 
-              style={styles.generateButton}
-              onPress={() => alert("AI Task Generation coming soon!")}
+              style={[styles.generateButton, isLoading && styles.disabledButton]}
+              onPress={generateTasks}
+              disabled={isLoading || !prompt.trim()}
             >
-              <Text style={styles.generateButtonText}>Generate Task</Text>
+              <Text style={styles.generateButtonText}>
+                {isLoading ? 'Generating...' : 'Generate Task'}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -127,5 +167,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
