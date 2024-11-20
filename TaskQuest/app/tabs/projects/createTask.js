@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, TextInput, Text, Switch, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import { View, TextInput, Text, Modal, StyleSheet, TouchableOpacity, FlatList, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Add this helper function for date formatting
+const formatDate = (date) => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[date.getMonth()]} ${date.getDate()}`;
+};
 
 export default function CreateTask({ onTaskCreated, onClose, projectId }) {
   const [taskType, setTaskType] = useState(null); // null, 'manual', or 'ai'
@@ -9,26 +16,41 @@ export default function CreateTask({ onTaskCreated, onClose, projectId }) {
   const [dueDate, setDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [flag, setFlag] = useState(false); // Flag for priority
-  const [selectedProject, setSelectedProject] = useState(null);
   const [assignedMember, setAssignedMember] = useState(null);
+  const [showMembers, setShowMembers] = useState(false);
+  const [isPriority, setIsPriority] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  // Mock data - replace with your actual project members
+  const projectMembers = [
+    { id: '1', name: 'James' },
+    { id: '2', name: 'Iesha' },
+    { id: '3', name: 'Marianne' },
+    { id: '4', name: 'Huang' },
+  ];
 
   const handleCreateTask = () => {
-    if (!selectedProject || !assignedMember || !title) {
-      alert("Please fill in all required fields");
+    if (!title) {
+      alert("Please enter a task name");
       return;
     }
 
     const task = {
       title,
-      description,
+      description: description || '', // Optional
       dueDate,
-      flag,
-      selectedProject,
+      isPriority,
       assignedMember,
-      taskType,
+      projectId,
     };
 
-    onTaskCreated(task); // Call the parent function to create the task
+    onTaskCreated(task);
+    onClose();
+  };
+
+  const handleAssignMember = (member) => {
+    setAssignedMember(member);
+    setShowMembers(false);
   };
 
   return (
@@ -60,54 +82,102 @@ export default function CreateTask({ onTaskCreated, onClose, projectId }) {
               placeholderTextColor="#999"
               value={title}
               onChangeText={setTitle}
-              style={styles.input}
+              style={styles.taskNameInput}
+              autoFocus={true}
             />
+            
             <TextInput
-              placeholder="Description"
+              placeholder="Description (optional)"
               placeholderTextColor="#999"
               value={description}
               onChangeText={setDescription}
-              style={[styles.input, styles.textArea]}
+              style={styles.descriptionInput}
               multiline
             />
             
-            <TouchableOpacity 
-              style={styles.button}
-              onPress={() => setAssignedMember("Alice")}
-            >
-              <Text style={styles.buttonText}>Assign</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.button}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.buttonText}>Due Date</Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={dueDate}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(false);
-                  if (selectedDate) setDueDate(selectedDate);
+            <View style={styles.buttonRow}>
+              <TouchableOpacity 
+                style={styles.dropdownButton}
+                onPress={() => {
+                  setShowMembers(!showMembers);
+                  setShowCalendar(false);
                 }}
-              />
+              >
+                <Text style={styles.buttonText}>
+                  {assignedMember ? assignedMember.name : "Assign"}
+                </Text>
+                <MaterialCommunityIcons name="chevron-down" size={20} color="#fff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.dropdownButton}
+                onPress={() => setShowCalendar(true)}
+              >
+                <Text style={styles.buttonText}>
+                  {dueDate ? formatDate(dueDate) : "Due Date"}
+                </Text>
+                <MaterialCommunityIcons name="chevron-down" size={20} color="#fff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.dropdownButton}
+                onPress={() => setIsPriority(!isPriority)}
+              >
+                <MaterialCommunityIcons 
+                  name={isPriority ? "flag" : "flag-outline"} 
+                  size={20} 
+                  color={isPriority ? "#ff4444" : "#fff"} 
+                />
+                <Text style={styles.buttonText}>Priority</Text>
+              </TouchableOpacity>
+            </View>
+
+            {showMembers && (
+              <View style={styles.membersList}>
+                {projectMembers.map((member) => (
+                  <TouchableOpacity
+                    key={member.id}
+                    style={styles.memberItem}
+                    onPress={() => handleAssignMember(member)}
+                  >
+                    <MaterialCommunityIcons name="account" size={20} color="#333" />
+                    <Text style={styles.memberName}>{member.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             )}
 
-            <TouchableOpacity 
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Priority</Text>
-            </TouchableOpacity>
+            {showCalendar && (
+              <>
+                <DateTimePicker
+                  value={dueDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, selectedDate) => {
+                    setShowCalendar(Platform.OS === 'ios');
+                    if (selectedDate) {
+                      setDueDate(selectedDate);
+                    }
+                  }}
+                />
+                {Platform.OS === 'ios' && showCalendar && (
+                  <View style={styles.iosCalendarButtons}>
+                    <TouchableOpacity 
+                      style={[styles.button, styles.doneButton]}
+                      onPress={() => setShowCalendar(false)}
+                    >
+                      <Text style={styles.buttonText}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </>
+            )}
 
             <TouchableOpacity 
               style={[styles.button, styles.createButton]}
               onPress={handleCreateTask}
             >
-              <Text style={styles.buttonText}>Create Task</Text>
+              <Text style={[styles.buttonText, styles.createButtonText]}>Create Task</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -122,10 +192,10 @@ export default function CreateTask({ onTaskCreated, onClose, projectId }) {
               style={styles.input}
             />
             <TouchableOpacity 
-              style={styles.button}
+              style={[styles.button, styles.createButton]}
               onPress={() => alert("AI Tasks Generated")}
             >
-              <Text style={styles.buttonText}>Generate AI Tasks</Text>
+              <Text style={[styles.buttonText, styles.createButtonText]}>Generate Task</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -154,7 +224,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   closeButtonText: {
-    fontSize: 24,
+    fontSize: 15,
     color: '#000',
   },
   buttonContainer: {
@@ -175,7 +245,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
+    marginHorizontal: 4,
   },
   form: {
     width: '100%',
@@ -194,5 +265,85 @@ const styles = StyleSheet.create({
   createButton: {
     backgroundColor: '#B0ACEC',
     marginTop: 20,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+    marginTop: 10,
+    paddingHorizontal: 5,
+  },
+  dropdownButton: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#333',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
+    height: 36,
+  },
+  membersList: {
+    position: 'absolute',
+    top: '45%',
+    left: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1000,
+    width: '40%',
+  },
+  memberItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  memberName: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#333',
+  },
+  taskNameInput: {
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    fontSize: 20, // Larger text for task name
+    fontWeight: '500',
+    height: 60,
+  },
+  descriptionInput: {
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    fontSize: 16,
+    height: 45, // Smaller height for description
+    textAlignVertical: 'top',
+    multiline: true,
+  },
+  iosCalendarButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 10,
+    backgroundColor: '#fff',
+  },
+  doneButton: {
+    paddingVertical: 8, // Smaller padding for Done button
+    paddingHorizontal: 15,
+    marginVertical: 0, // Remove vertical margin
+  },
+  createButtonText: {
+    fontWeight: '600', // or 'bold' for maximum boldness
+    fontSize: 16, // Optional: make text slightly larger
   },
 });
