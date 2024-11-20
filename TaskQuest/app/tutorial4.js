@@ -13,52 +13,49 @@ export default function App() {
         <Text style={styles.linkText}>End Tutorial</Text>
       </TouchableOpacity>
 
-      {/* Home Page Title */}
-      <Text style={styles.title}>Home Page:</Text>
+      {/* Gamification Title */}
+      <Text style={styles.title}>Gamification:</Text>
 
-      {/* Progress Bar Section */}
+      {/* Games */}
       <View style={styles.section}>
         <Text style={styles.description}>
-          The Progress Bar will show the completion rate of the project:
+        Select and play variety of games:
         </Text>
         <Image
-          source={require("../assets/progress-bar.png")}
-          style={styles.progressBar}
-        />
-      </View>
-
-      {/* Slider Section */}
-      <View style={styles.section}>
-        <Text style={styles.description}>
-          The Slider will let you choose between Gamification and Clean modes:
-        </Text>
-        <Image
-          source={require("../assets/gamification.png")}
+          source={require("../assets/games.png")}
           style={styles.slider}
         />
       </View>
 
-      {/* Text and Bottom Navigation */}
-      <View style={styles.bottomSection}>
-        <Text style={styles.lastText}>
-          At the bottom of the page, the buttons for the Homepage, Projects,
-          Notifications and Settings will be present:
+      {/* Badges */}
+      <View style={styles.section}>
+        <Text style={styles.description}>
+        Earn Awards and Badges after working in the gamification mode:
         </Text>
-        
-          <Image
-            source={require("../assets/dashboard.png")}
-            style={styles.navIcons}
-          />
-     
+        <Image
+          source={require("../assets/badges.png")}
+          style={styles.progressBar}
+        />
       </View>
 
       {/* Next Button */}
       <TouchableOpacity style={styles.nextButton}
-        onPress={() => router.push('./tutorial4')}
+        onPress={() => router.push('./tutorial3')}
       >
         <Text style={styles.nextButtonText}>→</Text>
       </TouchableOpacity>
+
+      {/* Previous Button */}
+      
+        <TouchableOpacity style={styles.previousButton}
+        onPress={() => router.push('./tutorial2')}
+        >
+        <Text style={styles.previousButtonText}>←</Text>
+        </TouchableOpacity>
+
     </View>
+
+    
   );
 }
 
@@ -91,8 +88,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   progressBar: {
-    width: "90%",
-    height: 80,
+    width: "100%",
+    height: 250,
     resizeMode: "contain",
   },
   slider: {
@@ -139,4 +136,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  previousButton: {
+    marginTop: 20,
+    alignSelf: "center",
+    bottom: 48, // Adjust to control vertical positioning
+    right: 90, // Symmetric to 'nextButton'
+    backgroundColor: "#000",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  previousButtonText: {
+    fontSize: 24,
+    color: "#fff",
+    fontWeight: "bold",
+  },  
 });
