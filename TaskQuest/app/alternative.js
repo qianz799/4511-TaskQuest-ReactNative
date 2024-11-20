@@ -3,12 +3,10 @@ import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
-import { Link } from "expo-router";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function SignInWithGoogleButton() {
-
   const webClientId = '207537132897-48j7u5v34vg3qi3e71e290842o228occ.apps.googleusercontent.com';
   const iosClientId = '207537132897-f7lkp5m4ftlp39m0srgtv9aa1dntq70o.apps.googleusercontent.com';
   const router = useRouter();
@@ -38,14 +36,9 @@ export default function SignInWithGoogleButton() {
 
   return (
     <View style={styles.body}>
-        <Text style={styles.logo}>TaskQuest</Text>
       <TouchableOpacity style={styles.button} onPress={() => promptAsync()}>
         <Text style={styles.buttonText}>Sign in with Google</Text>
       </TouchableOpacity>
-      {/* Back Link */}
-      <Link href="./" style={styles.backLink}>
-        Back
-      </Link>
     </View>
   );
 }
@@ -70,21 +63,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  logo: {
-    fontSize: 36,
-    fontWeight: "bold",
-    marginBottom: 40,
-    textAlign: "center",
-  },
-  link: {
-    fontSize: 14,
-    color: "#007BFF",
-    textDecorationLine: "underline",
-  },
-  backLink: {
-    fontSize: 16,
-    color: "#007BFF",
-    textDecorationLine: "underline",
-    marginTop: 20,
-    },
 });
