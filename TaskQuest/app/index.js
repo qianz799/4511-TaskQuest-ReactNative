@@ -30,10 +30,11 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       {/* Alternative Sign-in Options */}
-      <TouchableOpacity style={styles.button}>
-        <Link href="./alternative-signin" style={styles.buttonText}>
-          Alternative Sign-in Options
-        </Link>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('./alternative')}
+      >
+        <Text style={styles.buttonText}>Alternative Sign In Options</Text>
       </TouchableOpacity>
 
       {/* Create New Account Link */}
