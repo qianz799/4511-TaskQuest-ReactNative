@@ -2,7 +2,7 @@
 IMPORTANT:
 For the alternative sign-in method, you will need to use X-code as your simulator and build it via Expo. Due to security reasons on their end, Google will not authorise the sign-in without a build version of the app.
 
-Here is a video of the complete working of the feature: [![Watch the video](https://img.youtube.com/vi/<[VIDEO_ID](https://youtu.be/5nWRMAjTR7Y)>/0.jpg)](https://www.youtube.com/watch?v=<[VIDEO_ID](https://youtu.be/5nWRMAjTR7Y)>)
+Here is a video of the complete working of the feature: [Watch Video on YouTube](https://www.youtube.com/watch?v=https://youtu.be/5nWRMAjTR7Y)
 
 
 TaskQuest a productivity app that is designed for students. The app helps students manage their group work more efficiently. Its main purpose is to make teamwork and task management easier.
