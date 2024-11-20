@@ -39,7 +39,7 @@ export default function ProjectView() {
 <Text style={styles.sectionTitle}>Tasks</Text>
 <Pressable 
     onPress={() => router.push({
-              pathname: '/createTask',
+              pathname: '/tabs/projects/createTask',
               params: { projectId: id }
             })}
             style={styles.addButton}
