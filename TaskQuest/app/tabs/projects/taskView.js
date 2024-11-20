@@ -1,10 +1,27 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useLayoutEffect } from "react";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function TaskView() {
   const { id, title, description, dueDate, complete } = useLocalSearchParams();
   const navigation = useNavigation();
+
+  const remainingDays = (date) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const dateDiff = due.getTime() - today.getTime();
+    const days = Math.round(dateDiff / (1000 * 3600 * 24))
+    if (days < 0) {
+      return <>
+          <Text style={{marginLeft: 15}}>{`Due ${dueDate} `}</Text>
+          <Text style={{color: 'red'}}>{`(${-days} days ago)`}</Text>
+      </>;
+    } if (days > 0) {
+      return <Text style={{marginLeft: 15}}>{`Due ${dueDate} (${-days} days)`}</Text>
+    }
+    return <Text style={{marginLeft: 15}}>{`Due today`}</Text>
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({title: title})
@@ -12,11 +29,22 @@ export default function TaskView() {
  
   return (
 <View style={styles.container}>
-<Text>Hi</Text>
-<Text>{title}</Text>
-<Text>{description}</Text>
-<Text>{dueDate}</Text>
-<Text>{complete}</Text>
+  <View style={styles.header}>
+  <Text style={styles.title}>{title}</Text>
+  <Text style={styles.description}>{description}</Text>
+  </View>
+
+  <View style={styles.taskHeader}>
+    <MaterialCommunityIcons name="calendar-month-outline" size={28} color="#6B6B6B"/>
+    {remainingDays(dueDate)}
+  </View>
+  {complete === 'true' && 
+    <View style={styles.taskHeader}>
+      <MaterialCommunityIcons name="check-circle-outline" size={28} color="#6B6B6B"/>
+      <Text style={{marginLeft: 15, fontSize: 16}}>Task marked as complete</Text>
+    </View>
+  }
+
 </View>
   );
 }
@@ -36,15 +64,15 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 8,
     color: '#666',
+    fontSize: 18,
   },
   taskSection: {
     flex: 1,
   },
   taskHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 3,
   },
   sectionTitle: {
     fontSize: 20,

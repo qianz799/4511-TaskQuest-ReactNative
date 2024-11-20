@@ -34,7 +34,7 @@ export default function ProjectView() {
 <Text style={styles.description}>{description}</Text>
 </View>
  
-<View style={styles.taskSection}>
+<View>
 <View style={styles.taskHeader}>
 <Text style={styles.sectionTitle}>Tasks</Text>
 <Pressable 
