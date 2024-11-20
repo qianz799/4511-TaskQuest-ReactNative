@@ -40,7 +40,7 @@ export default function ProjectView() {
 <Text style={styles.description}>{description}</Text>
 </View>
  
-<View style={styles.taskSection}>
+<View>
 <View style={styles.taskHeader}>
 <Text style={styles.sectionTitle}>Tasks</Text>
 
@@ -59,7 +59,7 @@ export default function ProjectView() {
           data={taskData.filter(task => task.complete)}
           renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
           )}
-        />
+/>
 </View>
 <TouchableOpacity
     style={styles.addNewTaskButton}

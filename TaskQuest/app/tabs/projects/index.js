@@ -47,73 +47,38 @@ export default function ProjectsScreen() {
 }
  
 const styles = StyleSheet.create({
-
   container: {
-
     flex: 1,
-
     padding: 16,
-
   },
-
   section: {
-
     marginBottom: 24,
-
   },
-
   header: {
-
     flexDirection: 'row',
-
     justifyContent: 'space-between',
-
     alignItems: 'center',
-
     marginBottom: 12,
-
   },
-
   sectionTitle: {
-
     fontSize: 20,
-
     fontWeight: 'bold',
-
   },
-
   projectCard: {
-
     padding: 16,
-
     backgroundColor: '#fff',
-
     borderRadius: 8,
-
     marginBottom: 12,
-
     shadowColor: '#000',
-
     shadowOpacity: 0.1,
-
     shadowRadius: 4,
-
     elevation: 2,
-
   },
-
   taskCard: {
-
     padding: 12,
-
     backgroundColor: '#fff',
-
     borderRadius: 8,
-
     marginRight: 12,
-
     minWidth: 150,
-
   },
-
 });
