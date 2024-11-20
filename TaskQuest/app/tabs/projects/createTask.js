@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { View, TextInput, Text, Modal, StyleSheet, TouchableOpacity, FlatList, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Add at the top with other constants
+const TASKS_KEY = '@tasks';
 
 // Add this helper function for date formatting
 const formatDate = (date) => {
@@ -29,23 +33,33 @@ export default function CreateTask({ onTaskCreated, onClose, projectId }) {
     { id: '4', name: 'Huang' },
   ];
 
-  const handleCreateTask = () => {
+  const handleCreateTask = async () => {
     if (!title) {
       alert("Please enter a task name");
       return;
     }
 
-    const task = {
+    const newTask = {
+      id: Date.now().toString(),
       title,
-      description: description || '', // Optional
-      dueDate,
+      description: description || '',
+      dueDate: dueDate.toISOString(),
       isPriority,
       assignedMember,
       projectId,
+      complete: false
     };
 
-    onTaskCreated(task);
-    onClose();
+    try {
+      // Get existing tasks
+      const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
+      const tasks = storedTasks ? JSON.parse(storedTasks) : [];
+      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify([...tasks, newTask]));
+      onClose();
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      alert('Failed to save task');
+    }
   };
 
   const handleAssignMember = (member) => {
