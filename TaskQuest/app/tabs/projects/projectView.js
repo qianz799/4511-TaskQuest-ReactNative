@@ -1,10 +1,31 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import TaskSummary from "../../../components/taskSummary";
+import { useEffect, useLayoutEffect, useState } from "react";
  
 export default function ProjectView() {
-  const { id, title, description, tasks } = useLocalSearchParams();
+  const { id, title, description, tasks, gamification } = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
+  const [taskData, setTaskData] = useState([]);
+
+  const toggleStatus = (id) => {
+    setTaskData(taskData.map(task => {
+      if (task.id === id) {
+        return {...task, complete: !task.complete}
+      }
+      return task;
+    }))
+  }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({title: title})
+  }, [navigation])
+
+  useEffect(() => {
+    setTaskData(JSON.parse(tasks));
+    console.log(tasks)
+  }, [tasks])
  
   return (
 <View style={styles.container}>
@@ -13,7 +34,7 @@ export default function ProjectView() {
 <Text style={styles.description}>{description}</Text>
 </View>
  
-      <View style={styles.taskSection}>
+<View style={styles.taskSection}>
 <View style={styles.taskHeader}>
 <Text style={styles.sectionTitle}>Tasks</Text>
 <Pressable 
@@ -28,21 +49,17 @@ export default function ProjectView() {
 </View>
  
         <FlatList
-          data={JSON.parse(tasks)}
-          renderItem={({ item }) => (
-<Pressable 
-              style={styles.taskCard}
-              onPress={() => router.push({
-                pathname: 'tabs/projects/taskView',
-                params: { id: item.id, title: item.title, description: item.description, dueDate: item.dueDate, taskStatus: item.status}
-              })}
->
-<View style={styles.taskInfo}>
-<Text style={styles.taskTitle}>{item.title}</Text>
-<Text style={styles.taskDate}>{item.dueDate}</Text>
+          data={taskData.filter(task => !task.complete)}
+          renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
+          )}
+        />
+
+<View style={styles.taskHeader}>
+<Text style={styles.sectionTitle}> Completed Tasks</Text>
 </View>
-<Text style={styles.taskStatus}>{item.status}</Text>
-</Pressable>
+<FlatList
+          data={taskData.filter(task => task.complete)}
+          renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
           )}
         />
 </View>
