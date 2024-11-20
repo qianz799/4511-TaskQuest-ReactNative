@@ -20,47 +20,51 @@ export default function RegisterScreen() {
   
   return (
     <View style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        <View style={styles.profileContainer}>
-          <View style={styles.profileCircle}>
-            <Text style={styles.profileText}>JW</Text>
-          </View>
+      {/* Center Profile Section */}
+      <View style={styles.profileSection}>
+        <View style={styles.profileCircle}>
+          <Text style={styles.profileText}>JW</Text>
         </View>
         <TouchableOpacity style={styles.rewards}>
-          <Ionicons name="trophy-outline" size={24} color="gold" />
+          <MaterialCommunityIcons name="trophy" size={55} color="orange" />
           <Text style={styles.rewardsText}>Rewards</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Settings Options */}
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.settingsHeader}>Settings</Text>
-        {/* Mode Toggle Section */}
-      <View style={styles.modeToggleContainer}>
-        {/* CheckBox -> Switch -> Trophy */}
-        <MaterialCommunityIcons
-          name="check-circle-outline"
-          size={24}
-          color={isCleanMode ? '#B0ACEC' : '#ccc'}
-        />
-        <Switch
-          value={!isCleanMode}
-          onValueChange={toggleMode}
-          thumbColor={isCleanMode ? '#B0ACEC' : '#FFC107'}
-          trackColor={{ false: '#B0ACEC', true: '#FFC107' }}
-          style={styles.switch}
-        />
-        <MaterialCommunityIcons
-          name="trophy-outline"
-          size={24}
-          color={!isCleanMode ? '#FFC107' : '#ccc'}
-        />
+      {/* Mode Toggle Section - Moved under profile */}
+      <View style={styles.modeToggleSection}>
+        <View style={styles.modeToggleContainer}>
+          <MaterialCommunityIcons
+            name="check-circle-outline"
+            size={24}
+            color={isCleanMode ? '#B0ACEC' : '#ccc'}
+          />
+          <Switch
+            value={!isCleanMode}
+            onValueChange={toggleMode}
+            thumbColor={isCleanMode ? '#B0ACEC' : '#FFC107'}
+            trackColor={{ false: '#B0ACEC', true: '#FFC107' }}
+            style={styles.switch}
+          />
+          <MaterialCommunityIcons
+            name="trophy"
+            size={24}
+            color={!isCleanMode ? '#FFC107' : '#ccc'}
+          />
+        </View>
       </View>
-      <Text style={[styles.modeLabel, { color: isCleanMode ? '#B0ACEC' : '#FFC107' }]}>
-        {isCleanMode ? 'Clean Mode' : 'Game Mode'}
-      </Text>
 
+      {/* New Game Button */}
+      <TouchableOpacity 
+        style={styles.gameButton}
+        onPress={() => router.push('/tabs/game')}
+      >
+        <Text style={styles.buttonText}>Play Game</Text>
+      </TouchableOpacity>
+
+      {/* Settings Options */}
+      <View style={styles.settingsContainer}>
+        <Text style={styles.settingsHeader}>Settings</Text>
         <TouchableOpacity style={styles.settingsButton}>
           <Text style={styles.buttonText}>Account</Text>
         </TouchableOpacity>
@@ -79,14 +83,17 @@ export default function RegisterScreen() {
         <TouchableOpacity style={styles.settingsButton}>
           <Text style={styles.buttonText}>Terms of service</Text>
         </TouchableOpacity>
+      </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton}
-        onPress={() => router.push('../../index')}
+      {/* Logout Button - Moved to bottom */}
+      <View style={styles.logoutContainer}>
+        <TouchableOpacity 
+          style={[styles.logoutButton, { backgroundColor: '#ff3b30' }]}
+          onPress={() => router.push('/')}
         >
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={[styles.logoutText, { color: '#fff' }]}>Logout</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -96,62 +103,69 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  profileSection: {
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  profileContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 20,
   },
   profileCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: '#d7f0ff',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 10,
   },
   profileText: {
-    fontSize: 18,
+    fontSize: 32,
     fontWeight: 'bold',
   },
   rewards: {
+    position: 'absolute',
+    top: 10,
+    right: 20,
     alignItems: 'center',
   },
-  rewardsText: {
-    marginTop: 4,
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#555',
+  modeToggleSection: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
-  content: {
+  modeToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  settingsContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  settingsButton: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  logoutContainer: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  logoutButton: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   settingsHeader: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
   },
-  settingsButton: {
-    backgroundColor: '#e0e0e0',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
   buttonText: {
     fontSize: 14,
-  },
-  logoutButton: {
-    backgroundColor: '#d9534f',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginTop: 16,
   },
   logoutText: {
     fontSize: 14,
@@ -166,20 +180,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: '#000',
   },
-  modeToggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 10,
-  },
-  modeLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-  },
   switch: { marginLeft: 8 },
+  gameButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
 });
