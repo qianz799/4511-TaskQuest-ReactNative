@@ -1,9 +1,8 @@
 // displayUI elements: mode toggle, recent projects, upcoming tasks
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Button, Switch, StyleSheet, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Switch, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import CreateTask from './createTask'; // Import the CreateTask component
 
 
 export default function HomeScreen({ onCreateTask }) {
@@ -150,13 +149,6 @@ export default function HomeScreen({ onCreateTask }) {
         />
       </View>
 
-      Add Button for Creating New Tasks
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={onCreateTask}
-      >
-        <Text style={styles.addButtonText}>+</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -218,23 +210,7 @@ const styles = StyleSheet.create({
   taskName: { fontSize: 16, fontWeight: 'bold' },
   dueDateContainer: { flexDirection: 'row', alignItems: 'center' },
   taskEditButton: { padding: 4 },
-  addButton: {
-    position: 'absolute',
-    bottom: 55,
-    right: 16,
-    width: 56,
-    height: 56,
-    backgroundColor: '#B0ACEC',
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5, // floating
-  },
-  addButtonText: { color: '#fff', fontSize: 40 },
+  
 });
 
 
