@@ -1,99 +1,131 @@
 import React, { useState } from "react";
-import { View, Button, TextInput, Text, Switch, Modal } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import TaskForm from '../../../components/TaskForm';
 
-export default function CreateTask({ onTaskCreated }) {
-  const [taskType, setTaskType] = useState(null); // null, 'manual', or 'ai'
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [flag, setFlag] = useState(false); // Flag for priority
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [assignedMember, setAssignedMember] = useState(null);
-
-  const handleCreateTask = () => {
-    if (!selectedProject || !assignedMember || !title) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    const task = {
-      title,
-      description,
-      dueDate,
-      flag,
-      selectedProject,
-      assignedMember,
-      taskType,
-    };
-
-    onTaskCreated(task); // Call the parent function to create the task
-  };
+export default function CreateTask({ onClose, projectId }) {
+  const [taskType, setTaskType] = useState('manual'); // 'manual' or 'ai'
 
   return (
-    <View style={{ padding: 20 }}>
-      {/* Task Type Modal */}
-      <Text>Select Task Type:</Text>
-      <Button title="Manual Task" onPress={() => setTaskType("manual")} />
-      <Button title="AI Breakdown" onPress={() => setTaskType("ai")} />
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeButtonText}>✕</Text>
+        </TouchableOpacity>
 
-      {/* Manual Task Form */}
-      {taskType === "manual" && (
-        <View>
-          <TextInput
-            placeholder="Task Title"
-            value={title}
-            onChangeText={setTitle}
-            style={{ height: 50, backgroundColor: "white", marginBottom: 10 }}
+        <View style={styles.taskTypeButtons}>
+          <TouchableOpacity 
+            style={[styles.typeButton, taskType === 'manual' && styles.activeTypeButton]}
+            onPress={() => setTaskType('manual')}
+          >
+            <Text style={[styles.typeButtonText, taskType === 'manual' && styles.activeTypeText]}>
+              Manual
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.typeButton, taskType === 'ai' && styles.activeTypeButton]}
+            onPress={() => setTaskType('ai')}
+          >
+            <Text style={[styles.typeButtonText, taskType === 'ai' && styles.activeTypeText]}>
+              AI Generate
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {taskType === 'manual' ? (
+          <TaskForm 
+            mode="create"
+            projectId={projectId}
+            onClose={onClose}
           />
-          <TextInput
-            placeholder="Task Description"
-            value={description}
-            onChangeText={setDescription}
-            style={{ height: 150, backgroundColor: "white", marginBottom: 10 }}
-            multiline
-          />
-          {/* Project Selection */}
-          <Button title={`Select Project: ${selectedProject || "None"}`} onPress={() => setSelectedProject("Project Alpha")} />
-          {/* Member Assignment */}
-          <Button title={`Assign Member: ${assignedMember || "None"}`} onPress={() => setAssignedMember("Alice")} />
-          {/* Due Date */}
-          <Button title={`Due Date: ${dueDate.toLocaleDateString()}`} onPress={() => setShowDatePicker(true)} />
-          {showDatePicker && (
-            <DateTimePicker
-              value={dueDate}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) setDueDate(selectedDate);
-              }}
+        ) : (
+          <View style={styles.aiForm}>
+            <TextInput
+              placeholder="What task would you like AI to break down?"
+              placeholderTextColor="#999"
+              style={styles.aiInput}
+              multiline
             />
-          )}
-          {/* Priority */}
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text>Priority</Text>
-            <Switch value={flag} onValueChange={setFlag} style={{ marginLeft: 10 }} />
+            <TouchableOpacity 
+              style={styles.generateButton}
+              onPress={() => alert("AI Task Generation coming soon!")}
+            >
+              <Text style={styles.generateButtonText}>Generate Task</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-      )}
-
-      {/* AI Breakdown Form */}
-      {taskType === "ai" && (
-        <View>
-          <TextInput
-            placeholder="AI Breakdown Prompt"
-            value={title}
-            onChangeText={setTitle}
-            style={{ height: 50, backgroundColor: "white", marginBottom: 10 }}
-          />
-          <Button title="Generate AI Tasks" onPress={() => alert("AI Tasks Generated")} />
-        </View>
-      )}
-
-      {/* Save Button */}
-      <Button title="Create Task" onPress={handleCreateTask} />
+        )}
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 15,
+    color: '#000',
+  },
+  taskTypeButtons: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  typeButton: {
+    flex: 1,
+    padding: 12,
+    alignItems: 'center',
+    borderRadius: 25,
+    marginHorizontal: 5,
+    backgroundColor: '#f5f5f5',
+  },
+  activeTypeButton: {
+    backgroundColor: '#444',
+  },
+  typeButtonText: {
+    color: '#666',
+    fontWeight: '500',
+  },
+  activeTypeText: {
+    color: '#fff',
+  },
+  aiForm: {
+    marginTop: 20,
+  },
+  aiInput: {
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 10,
+    fontSize: 16,
+    height: 100,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+  },
+  generateButton: {
+    backgroundColor: '#B0ACEC',
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+  },
+  generateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});

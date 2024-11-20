@@ -1,10 +1,71 @@
-import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import TaskSummary from "../../../components/taskSummary";
- 
+import { useEffect, useLayoutEffect, useState } from "react";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import CreateTask from './createTask'; // Import the CreateTask component
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Add at the top with other constants
+const TASKS_KEY = '@tasks';
+
 export default function ProjectView() {
-  const { id, title, description, tasks } = useLocalSearchParams();
+  const { id, title, description, tasks, gamification } = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
+  const [taskData, setTaskData] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const toggleStatus = (id) => {
+    setTaskData(taskData.map(task => {
+      if (task.id === id) {
+        return {...task, complete: !task.complete}
+      }
+      return task;
+    }))
+  }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({title: title})
+  }, [navigation])
+
+  const loadTasks = async () => {
+    try {
+      const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
+      const allTasks = storedTasks ? JSON.parse(storedTasks) : [];
+      const projectTasks = allTasks.filter(task => task.projectId === id);
+      
+      // Sort tasks by priority and due date
+      const sortedTasks = projectTasks.sort((a, b) => {
+        // Prioritize priority items
+        if (a.isPriority && !b.isPriority) return -1;
+        if (!a.isPriority && b.isPriority) return 1;
+
+        // For items with same priority status, sort by due date
+        if (a.dueDate && b.dueDate) {
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        } else if (a.dueDate) {
+          return -1;
+        } else if (b.dueDate) {
+          return 1;
+        }
+        return 0;
+      });
+
+      setTaskData(sortedTasks);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+    }
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    loadTasks();
+  };
+
+  useEffect(() => {
+    loadTasks();
+  }, [])
  
   return (
 <View style={styles.container}>
@@ -13,39 +74,53 @@ export default function ProjectView() {
 <Text style={styles.description}>{description}</Text>
 </View>
  
-      <View style={styles.taskSection}>
+<View>
 <View style={styles.taskHeader}>
 <Text style={styles.sectionTitle}>Tasks</Text>
-<Pressable 
-    onPress={() => router.push({
-              pathname: '/createTask',
-              params: { projectId: id }
-            })}
-            style={styles.addButton}
->
-<Text>Add Task</Text>
-</Pressable>
+
 </View>
  
         <FlatList
-          data={JSON.parse(tasks)}
+          data={taskData.filter(task => !task.complete)}
           renderItem={({ item }) => (
-<Pressable 
-              style={styles.taskCard}
-              onPress={() => router.push({
-                pathname: 'tabs/projects/taskView',
-                params: { id: item.id, title: item.title, description: item.description, dueDate: item.dueDate, taskStatus: item.status}
-              })}
->
-<View style={styles.taskInfo}>
-<Text style={styles.taskTitle}>{item.title}</Text>
-<Text style={styles.taskDate}>{item.dueDate}</Text>
-</View>
-<Text style={styles.taskStatus}>{item.status}</Text>
-</Pressable>
+            <TaskSummary 
+              id={item.id} 
+              title={item.title} 
+              description={item.description} 
+              dueDate={item.dueDate} 
+              complete={item.complete} 
+              isPriority={item.isPriority}
+              toggleStatus={toggleStatus}
+            />
           )}
         />
+
+<View style={styles.taskHeader}>
+<Text style={styles.sectionTitle}> Completed Tasks</Text>
 </View>
+<FlatList
+          data={taskData.filter(task => task.complete)}
+          renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
+          )}
+/>
+</View>
+<TouchableOpacity
+    style={styles.addNewTaskButton}
+    onPress={() => setModalVisible(true)} // We'll need state for the modal
+  >
+    <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+  </TouchableOpacity>
+
+  {/* Add CreateTask Modal */}
+  <Modal
+    visible={modalVisible}
+    animationType="slide"
+    transparent={true}
+    onRequestClose={handleModalClose}
+  >
+    <CreateTask onClose={handleModalClose} projectId={id} />
+  </Modal>
+
 </View>
   );
 }
@@ -103,5 +178,22 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 4,
     backgroundColor: '#f0f0f0',
+  },
+  addNewTaskButton: {
+    position: 'absolute',
+    right: 30,
+    bottom: 70, // Adjust this value based on your tab height
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#B0ACEC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 999, // Ensures button stays on top
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

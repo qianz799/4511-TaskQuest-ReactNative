@@ -43,7 +43,7 @@ export default function LoginScreen() {
       {/* Login Button */}
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => router.push('/tabs/projects/homeScreen')} // Navigate to the home page
+        onPress={() => router.push('/tabs')} // Navigate to the home page
       >
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>

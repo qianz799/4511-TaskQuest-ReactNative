@@ -1,9 +1,8 @@
 // displayUI elements: mode toggle, recent projects, upcoming tasks
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Button, Switch, StyleSheet, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Switch, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import CreateTask from './createTask'; // Import the CreateTask component
 
 
 export default function HomeScreen({ onCreateTask }) {
@@ -14,10 +13,41 @@ export default function HomeScreen({ onCreateTask }) {
 
   // Example data for recent projects
   const recentProjects = [
-    { id: '1', name: 'Project A', completion: 0.7, tasksDue: 5 },
-    { id: '2', name: 'Project B', completion: 0.4, tasksDue: 3 },
-    { id: '3', name: 'Project C', completion: 0.85, tasksDue: 2 },
+    { id: 1, title: "Economics Assignment", description: "This is the description", tasks: [
+      { 
+        id: 1, 
+        title: "Task 1", 
+        description: "Task details",
+        dueDate: "2024-03-20",
+        complete: false
+      },
+    ]},
+    { id: 2, title: "Humanities Assignment", description: "This is the description", tasks: [
+      { 
+        id: 1, 
+        title: "Task 1", 
+        description: "Task details",
+        dueDate: "2024-03-20",
+        complete: false
+      },
+      { 
+        id: 2, 
+        title: "Task 2", 
+        description: "Task details",
+        dueDate: "2024-03-20",
+        complete: true
+      },
+    ]},
+    // ... more projects
   ];
+
+  const calculateCompletion = (tasks) => {
+    return tasks.filter(task => task.complete).length / tasks.length;
+  }
+
+  const calculateTasksDue = (tasks) => {
+    return tasks.filter(task => !tasks.complete).length;
+  }
 
   // Example data for upcoming tasks
   const upcomingTasks = [
@@ -67,17 +97,17 @@ export default function HomeScreen({ onCreateTask }) {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.projectCard}
-              onPress={() => router.push({ pathname: '/tabs/projects/projectView', params: { projectId: item.id }})}
+              onPress={() => router.push({pathname: 'tabs/projects/projectView', params: {id: item.id, description: item.description, title: item.title, tasks: JSON.stringify(item.tasks)}})}
             >
 
-              <Text style={styles.projectName}>{item.name}</Text>
-              <Text>Tasks Due: {item.tasksDue}</Text>
+              <Text style={styles.projectName}>{item.title}</Text>
+              <Text>Tasks Due: {calculateTasksDue(item.tasks)}</Text>
               {/* Custom progress bar representation */}
               <View style={styles.progressBarContainer}>
                 <View style={styles.progressBar}>
-                  <View style={[styles.progressBarFill, { width: `${item.completion * 100}%` }]} />
+                  <View style={[styles.progressBarFill, { width: `${Math.round(calculateCompletion(item.tasks) * 100)}%` }]} />
                 </View>
-                <Text style={styles.progressText}>{Math.round(item.completion * 100)}%</Text>
+                <Text style={styles.progressText}>{Math.round(calculateCompletion(item.tasks) * 100)}%</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -119,13 +149,6 @@ export default function HomeScreen({ onCreateTask }) {
         />
       </View>
 
-      Add Button for Creating New Tasks
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={onCreateTask}
-      >
-        <Text style={styles.addButtonText}>+</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -187,23 +210,7 @@ const styles = StyleSheet.create({
   taskName: { fontSize: 16, fontWeight: 'bold' },
   dueDateContainer: { flexDirection: 'row', alignItems: 'center' },
   taskEditButton: { padding: 4 },
-  addButton: {
-    position: 'absolute',
-    bottom: 55,
-    right: 16,
-    width: 56,
-    height: 56,
-    backgroundColor: '#B0ACEC',
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5, // floating
-  },
-  addButtonText: { color: '#fff', fontSize: 40 },
+  
 });
 
 
