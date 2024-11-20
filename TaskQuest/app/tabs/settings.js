@@ -3,11 +3,20 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Switch, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 export default function RegisterScreen() {
   const [toggle1, setToggle1] = useState(false);
   const [toggle2, setToggle2] = useState(false);
   const router = useRouter();
+  const [isCleanMode, setIsCleanMode] = useState(false);
+
+  // Function to toggle between modes
+  const toggleMode = (value) => {
+    setIsCleanMode(!value);
+  };
+
   
   return (
     <View style={styles.container}>
@@ -27,6 +36,30 @@ export default function RegisterScreen() {
       {/* Settings Options */}
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.settingsHeader}>Settings</Text>
+        {/* Mode Toggle Section */}
+      <View style={styles.modeToggleContainer}>
+        {/* CheckBox -> Switch -> Trophy */}
+        <MaterialCommunityIcons
+          name="check-circle-outline"
+          size={24}
+          color={isCleanMode ? '#B0ACEC' : '#ccc'}
+        />
+        <Switch
+          value={!isCleanMode}
+          onValueChange={toggleMode}
+          thumbColor={isCleanMode ? '#B0ACEC' : '#FFC107'}
+          trackColor={{ false: '#B0ACEC', true: '#FFC107' }}
+          style={styles.switch}
+        />
+        <MaterialCommunityIcons
+          name="trophy-outline"
+          size={24}
+          color={!isCleanMode ? '#FFC107' : '#ccc'}
+        />
+      </View>
+      <Text style={[styles.modeLabel, { color: isCleanMode ? '#B0ACEC' : '#FFC107' }]}>
+        {isCleanMode ? 'Clean Mode' : 'Game Mode'}
+      </Text>
 
         <TouchableOpacity style={styles.settingsButton}>
           <Text style={styles.buttonText}>Account</Text>
@@ -133,4 +166,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: '#000',
   },
+  modeToggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
+  },
+  modeLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  switch: { marginLeft: 8 },
 });
