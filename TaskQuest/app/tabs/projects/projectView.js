@@ -1,13 +1,19 @@
-import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import TaskSummary from "../../../components/taskSummary";
 import { useEffect, useLayoutEffect, useState } from "react";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import CreateTask from './createTask'; // Import the CreateTask component
+
+
+
  
 export default function ProjectView() {
   const { id, title, description, tasks, gamification } = useLocalSearchParams();
   const router = useRouter();
   const navigation = useNavigation();
   const [taskData, setTaskData] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const toggleStatus = (id) => {
     setTaskData(taskData.map(task => {
@@ -37,15 +43,7 @@ export default function ProjectView() {
 <View style={styles.taskSection}>
 <View style={styles.taskHeader}>
 <Text style={styles.sectionTitle}>Tasks</Text>
-<Pressable 
-    onPress={() => router.push({
-              pathname: '/tabs/projects/createTask',
-              params: { projectId: id }
-            })}
-            style={styles.addButton}
->
-<Text>Add Task</Text>
-</Pressable>
+
 </View>
  
         <FlatList
@@ -63,6 +61,23 @@ export default function ProjectView() {
           )}
         />
 </View>
+<TouchableOpacity
+    style={styles.addNewTaskButton}
+    onPress={() => setModalVisible(true)} // We'll need state for the modal
+  >
+    <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+  </TouchableOpacity>
+
+  {/* Add CreateTask Modal */}
+  <Modal
+    visible={modalVisible}
+    animationType="slide"
+    transparent={true}
+    onRequestClose={() => setModalVisible(false)}
+  >
+    <CreateTask onClose={() => setModalVisible(false)} projectId={id} />
+  </Modal>
+
 </View>
   );
 }
@@ -120,5 +135,22 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 4,
     backgroundColor: '#f0f0f0',
+  },
+  addNewTaskButton: {
+    position: 'absolute',
+    right: 30,
+    bottom: 70, // Adjust this value based on your tab height
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#B0ACEC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 999, // Ensures button stays on top
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
