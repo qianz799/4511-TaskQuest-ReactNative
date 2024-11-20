@@ -2,111 +2,92 @@ import { useRouter } from "expo-router";
 import { StyleSheet, View, TouchableOpacity, Text, Pressable } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function TaskSummary({id, title, description, dueDate, complete, toggleStatus}) {
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+};
+
+export default function TaskSummary({ id, title, description, dueDate, complete, isPriority, toggleStatus }) {
   const router = useRouter();
 
   return (
-    <Pressable onPress={() => router.push({
-      pathname: 'tabs/projects/taskView',
-      params: { id: id, title: title, description: description, dueDate: dueDate, complete: complete}
-    })}>
-      <View style={styles.taskCard}>
-      <View style={styles.taskHeader}>
-        <TouchableOpacity
-          style={styles.roundCheckbox}
-          onPress={() => toggleStatus(id)}
+    <Pressable 
+      style={[
+        styles.taskCard,
+        isPriority && styles.priorityTask
+      ]} 
+      onPress={() => router.push({
+        pathname: 'tabs/projects/taskView',
+        params: { id, title, description, dueDate, complete: complete.toString() }
+      })}
+    >
+      <TouchableOpacity 
+        style={styles.checkboxContainer} 
+        onPress={() => toggleStatus(id)}
+      >
+        <MaterialCommunityIcons 
+          name={complete ? "checkbox-marked-circle" : "checkbox-blank-circle-outline"} 
+          size={22} 
+          color={complete ? "#4CAF50" : "#666"}
         />
-        <View style={styles.taskContent}>
-          <Text style={styles.taskName}>{title}</Text>
-          <View style={styles.dueDateContainer}>
-            <MaterialCommunityIcons
-              name="calendar-month-outline"
-              size={18}
-              color="#6B6B6B"
-            />
-            <Text style={{ marginLeft: 4 }}>Due: {dueDate}</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.taskEditButton}>
-          <Text>...</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
+
+      <View style={styles.taskInfo}>
+        <Text style={[
+          styles.taskTitle,
+          complete && styles.completedTask
+        ]}>
+          {title}
+        </Text>
+        <Text style={styles.taskDate}>{formatDate(dueDate)}</Text>
       </View>
-    </View>
+
+      {isPriority && (
+        <MaterialCommunityIcons 
+          name="flag" 
+          size={18} 
+          color="#ff4444" 
+          style={styles.flagIcon}
+        />
+      )}
     </Pressable>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  modeToggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 10,
-  },
-  modeLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  switch: { marginLeft: 8 },
-  section: { marginBottom: 24, marginTop: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  projectCard: {
-    padding: 16,
-    marginRight: 12,
-    backgroundColor: '#e0e0e0',
+  taskCard: {
+    padding: 12,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    width: 150,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
   },
-  projectName: { fontSize: 16, fontWeight: 'bold' },
-  progressBar: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginTop: 4,
+  priorityTask: {
+    backgroundColor: '#fff3cd',
   },
-  progressBarFill: {
-    height: '100%', 
-    backgroundColor: '#4CAF50', 
-    borderRadius: 4
+  checkboxContainer: {
+    marginRight: 12,
   },
-  progressText: { marginLeft: 8, fontSize: 12, color: '#333' },
-  taskCard: { padding: 16, marginBottom: 8, backgroundColor: '#dddddd', borderRadius: 8 },
-  taskHeader: { flexDirection: 'row', alignItems: 'center' },
-  roundCheckbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#888',
-    borderRadius: 12,
+  taskInfo: {
+    flex: 1,
     marginRight: 8,
   },
-  taskContent: { flex: 1 },
-  taskName: { fontSize: 16, fontWeight: 'bold' },
-  dueDateContainer: { flexDirection: 'row', alignItems: 'center' },
-  taskEditButton: { padding: 4 },
-  addButton: {
-    position: 'absolute',
-    bottom: 55,
-    right: 16,
-    width: 56,
-    height: 56,
-    backgroundColor: '#B0ACEC',
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5, // floating
+  flagIcon: {
+    marginLeft: 'auto',
   },
-  addButtonText: { color: '#fff', fontSize: 40 },
+  taskTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  completedTask: {
+    textDecorationLine: 'line-through',
+    color: '#666',
+  },
+  taskDate: {
+    color: '#666',
+    fontSize: 13,
+  }
 });

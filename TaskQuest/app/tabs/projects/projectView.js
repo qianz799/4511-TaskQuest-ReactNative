@@ -4,10 +4,11 @@ import TaskSummary from "../../../components/taskSummary";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CreateTask from './createTask'; // Import the CreateTask component
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Add at the top with other constants
+const TASKS_KEY = '@tasks';
 
-
- 
 export default function ProjectView() {
   const { id, title, description, tasks, gamification } = useLocalSearchParams();
   const router = useRouter();
@@ -28,10 +29,43 @@ export default function ProjectView() {
     navigation.setOptions({title: title})
   }, [navigation])
 
+  const loadTasks = async () => {
+    try {
+      const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
+      const allTasks = storedTasks ? JSON.parse(storedTasks) : [];
+      const projectTasks = allTasks.filter(task => task.projectId === id);
+      
+      // Sort tasks by priority and due date
+      const sortedTasks = projectTasks.sort((a, b) => {
+        // Prioritize priority items
+        if (a.isPriority && !b.isPriority) return -1;
+        if (!a.isPriority && b.isPriority) return 1;
+
+        // For items with same priority status, sort by due date
+        if (a.dueDate && b.dueDate) {
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        } else if (a.dueDate) {
+          return -1;
+        } else if (b.dueDate) {
+          return 1;
+        }
+        return 0;
+      });
+
+      setTaskData(sortedTasks);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+    }
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    loadTasks();
+  };
+
   useEffect(() => {
-    setTaskData(JSON.parse(tasks));
-    console.log(tasks)
-  }, [tasks])
+    loadTasks();
+  }, [])
  
   return (
 <View style={styles.container}>
@@ -48,7 +82,16 @@ export default function ProjectView() {
  
         <FlatList
           data={taskData.filter(task => !task.complete)}
-          renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
+          renderItem={({ item }) => (
+            <TaskSummary 
+              id={item.id} 
+              title={item.title} 
+              description={item.description} 
+              dueDate={item.dueDate} 
+              complete={item.complete} 
+              isPriority={item.isPriority}
+              toggleStatus={toggleStatus}
+            />
           )}
         />
 
@@ -73,9 +116,9 @@ export default function ProjectView() {
     visible={modalVisible}
     animationType="slide"
     transparent={true}
-    onRequestClose={() => setModalVisible(false)}
+    onRequestClose={handleModalClose}
   >
-    <CreateTask onClose={() => setModalVisible(false)} projectId={id} />
+    <CreateTask onClose={handleModalClose} projectId={id} />
   </Modal>
 
 </View>
