@@ -1,25 +1,30 @@
 import { useRouter } from "expo-router";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text, Pressable } from "react-native";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function TaskSummary(taskInfo) {
+export default function TaskSummary({id, title, description, dueDate, complete, toggleStatus}) {
   const router = useRouter();
 
   return (
-    <View style={styles.taskCard}>
+    <Pressable onPress={() => router.push({
+      pathname: 'tabs/projects/taskView',
+      params: { id: id, title: title, description: description, dueDate: dueDate, complete: complete}
+    })}>
+      <View style={styles.taskCard}>
       <View style={styles.taskHeader}>
         <TouchableOpacity
           style={styles.roundCheckbox}
-          onPress={() => router.push({pathname: 'tabs/projects/viewTask', params: {title: Hello}})}
+          onPress={() => toggleStatus(id)}
         />
         <View style={styles.taskContent}>
-          <Text style={styles.taskName}>{item.name}</Text>
+          <Text style={styles.taskName}>{title}</Text>
           <View style={styles.dueDateContainer}>
             <MaterialCommunityIcons
               name="calendar-month-outline"
               size={18}
               color="#6B6B6B"
             />
-            <Text style={{ marginLeft: 4 }}>Due: {item.dueDate}</Text>
+            <Text style={{ marginLeft: 4 }}>Due: {dueDate}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.taskEditButton}>
@@ -27,6 +32,7 @@ export default function TaskSummary(taskInfo) {
         </TouchableOpacity>
       </View>
     </View>
+    </Pressable>
   )
 }
 
@@ -72,7 +78,7 @@ const styles = StyleSheet.create({
     borderRadius: 4
   },
   progressText: { marginLeft: 8, fontSize: 12, color: '#333' },
-  taskCard: { padding: 16, marginBottom: 8, backgroundColor: '#f0f0f0', borderRadius: 8 },
+  taskCard: { padding: 16, marginBottom: 8, backgroundColor: '#dddddd', borderRadius: 8 },
   taskHeader: { flexDirection: 'row', alignItems: 'center' },
   roundCheckbox: {
     width: 24,

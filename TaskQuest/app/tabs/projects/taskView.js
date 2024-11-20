@@ -2,8 +2,8 @@ import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useLayoutEffect } from "react";
 
-export default function ProjectView() {
-  const { id, title, description, dueDate, taskStatus } = useLocalSearchParams();
+export default function TaskView() {
+  const { id, title, description, dueDate, complete } = useLocalSearchParams();
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -16,7 +16,7 @@ export default function ProjectView() {
 <Text>{title}</Text>
 <Text>{description}</Text>
 <Text>{dueDate}</Text>
-<Text>{taskStatus}</Text>
+<Text>{complete}</Text>
 </View>
   );
 }

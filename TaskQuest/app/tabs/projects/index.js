@@ -13,7 +13,7 @@ export default function ProjectsScreen() {
         title: "Task 1", 
         description: "Task details",
         dueDate: "2024-03-20",
-        status: "pending"
+        complete: false
       },
     ]},
     // ... more projects
