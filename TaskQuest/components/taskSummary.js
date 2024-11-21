@@ -2,12 +2,13 @@ import { useRouter } from "expo-router";
 import { StyleSheet, View, TouchableOpacity, Text, Pressable } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
 
-export default function TaskSummary({ id, title, description, dueDate, complete, isPriority, toggleStatus }) {
+export default function TaskSummary({ id, title, description, dueDate, complete, isPriority, toggleStatus, assignedMember }) {
   const router = useRouter();
 
   return (
@@ -17,8 +18,16 @@ export default function TaskSummary({ id, title, description, dueDate, complete,
         isPriority && styles.priorityTask
       ]} 
       onPress={() => router.push({
-        pathname: 'tabs/projects/taskView',
-        params: { id, title, description, dueDate, complete: complete.toString() }
+        pathname: '/tabs/projects/editTask',
+        params: { 
+          id, 
+          title, 
+          description, 
+          dueDate, 
+          complete: complete.toString(),
+          isPriority: isPriority?.toString(),
+          assignedMember
+        }
       })}
     >
       <TouchableOpacity 
