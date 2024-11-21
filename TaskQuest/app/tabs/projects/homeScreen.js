@@ -149,8 +149,14 @@ export default function HomeScreen({ onCreateTask }) {
                 <TouchableOpacity
                   style={styles.roundCheckbox}
                   onPress={() => router.push({
-                    pathname: 'tabs/projects/taskView',
-                    params: { ...item }
+                    pathname: 'tabs/projects/projectView',
+                    params: {
+                      id: item.projectId,
+                      title: item.projectTitle,
+                      description: item.projectDescription,
+                      tasks: JSON.stringify([item]),
+                      selectedTaskId: item.id
+                    }
                   })}
                 />
                 <View style={styles.taskContent}>

@@ -2,13 +2,29 @@ import { useRouter } from "expo-router";
 import { StyleSheet, View, TouchableOpacity, Text, Pressable } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };
 
-export default function TaskSummary({ id, title, description, dueDate, complete, isPriority, toggleStatus }) {
+export default function TaskSummary({ 
+  id, 
+  title, 
+  description, 
+  dueDate, 
+  complete, 
+  isPriority, 
+  toggleStatus, 
+  projectId,
+  onDelete 
+}) {
   const router = useRouter();
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    onDelete(id);
+  };
 
   return (
     <Pressable 
@@ -17,8 +33,16 @@ export default function TaskSummary({ id, title, description, dueDate, complete,
         isPriority && styles.priorityTask
       ]} 
       onPress={() => router.push({
-        pathname: 'tabs/projects/taskView',
-        params: { id, title, description, dueDate, complete: complete.toString() }
+        pathname: '/tabs/projects/editTask',
+        params: { 
+          id, 
+          title, 
+          description, 
+          dueDate, 
+          complete: complete.toString(),
+          isPriority: isPriority?.toString(),
+          projectId
+        }
       })}
     >
       <TouchableOpacity 
@@ -51,14 +75,24 @@ export default function TaskSummary({ id, title, description, dueDate, complete,
         </View>
       </View>
 
-      {isPriority && (
-        <MaterialCommunityIcons 
-          name="flag" 
-          size={18} 
-          color="#ff4444" 
-          style={styles.flagIcon}
-        />
-      )}
+      <View style={styles.iconContainer}>
+        {isPriority && (
+          <MaterialCommunityIcons 
+            name="flag" 
+            size={18} 
+            color="#ff4444" 
+            style={styles.flagIcon}
+          />
+        )}
+        <TouchableOpacity onPress={handleDelete}>
+          <MaterialCommunityIcons 
+            name="trash-can-outline" 
+            size={18} 
+            color="#ff4444" 
+            style={styles.trashIcon}
+          />
+        </TouchableOpacity>
+      </View>
     </Pressable>
   );
 }
@@ -84,7 +118,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   flagIcon: {
-    marginLeft: 'auto',
+    marginRight: 8,
+  },
+  trashIcon: {
+    marginLeft: 4,
   },
   taskTitle: {
     fontSize: 15,
@@ -104,5 +141,10 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 13,
     marginLeft: 4,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
   },
 });
