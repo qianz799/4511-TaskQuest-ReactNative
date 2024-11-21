@@ -8,6 +8,19 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: '#B0ACEC',
+        tabBarInactiveTintColor: '#666',
+        tabBarItemStyle: {
+          paddingTop: 5,
+        },
+        tabBarIndicatorStyle: {
+          backgroundColor: '#B0ACEC',
+          height: 3,
+        },
+        tabBarIndicatorContainerStyle: {
+          position: 'absolute',
+          top: 0,
+        },
       }}
     >
       <Tabs.Screen
@@ -52,10 +65,12 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute', 
-    bottom: 0, 
-    height: 35, // change height if need to
-    paddingBottom: 0, 
-    paddingTop: 5, 
+    position: 'absolute',
+    bottom: 0,
+    height: 35,
+    paddingBottom: 2,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowOpacity: 0,
   },
 });
