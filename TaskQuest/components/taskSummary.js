@@ -39,7 +39,16 @@ export default function TaskSummary({ id, title, description, dueDate, complete,
         ]}>
           {title}
         </Text>
-        <Text style={styles.taskDate}>{formatDate(dueDate)}</Text>
+        <View style={styles.dateContainer}>
+          <MaterialCommunityIcons 
+            name="calendar-month-outline" 
+            size={16} 
+            color="#666"
+          />
+          <Text style={styles.taskDate}>
+            Due: {new Date(dueDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
+          </Text>
+        </View>
       </View>
 
       {isPriority && (
@@ -86,8 +95,14 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#666',
   },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
   taskDate: {
     color: '#666',
     fontSize: 13,
-  }
+    marginLeft: 4,
+  },
 });

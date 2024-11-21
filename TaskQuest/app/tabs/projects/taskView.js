@@ -4,7 +4,7 @@ import { useLayoutEffect } from "react";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function TaskView() {
-  const { id, title, description, dueDate, complete, updateStatus, deleteTask } = useLocalSearchParams();
+  const { id, title, description, dueDate, complete, updateStatus, deleteTask, isPriority } = useLocalSearchParams();
   const navigation = useNavigation();
 
   const createTwoButtonAlert = () =>
@@ -42,8 +42,23 @@ export default function TaskView() {
   </View>
 
   <View style={styles.taskHeader}>
-    <MaterialCommunityIcons name="calendar-month-outline" size={28} color="#6B6B6B"/>
-    {remainingDays(dueDate)}
+    <View style={styles.dateContainer}>
+      <MaterialCommunityIcons 
+        name="calendar-month-outline" 
+        size={28} 
+        color="#6B6B6B"
+      />
+      <Text style={styles.dateText}>
+        Due: {new Date(dueDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
+      </Text>
+    </View>
+    {isPriority === 'true' && (
+      <MaterialCommunityIcons
+        name="flag"
+        size={28}
+        color="red"
+      />
+    )}
   </View>
   {complete === 'true' && 
     <View style={styles.taskHeader}>
@@ -134,5 +149,13 @@ const styles = StyleSheet.create({
     color: "#6B6B6B",
     fontSize: 11,
     fontWeight: "600",
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    marginLeft: 15,
+    fontSize: 16,
   },
 });

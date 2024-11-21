@@ -1,15 +1,16 @@
 // displayUI elements: mode toggle, recent projects, upcoming tasks
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Switch, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function HomeScreen({ onCreateTask }) {
   // State to manage the current mode (Clean Mode or Gamification Mode)
   const [isCleanMode, setIsCleanMode] = useState(false);
   const router = useRouter();
-
+  const TASKS_KEY = '@tasks';
 
   // Example data for recent projects
   const recentProjects = [
@@ -46,15 +47,33 @@ export default function HomeScreen({ onCreateTask }) {
   }
 
   const calculateTasksDue = (tasks) => {
-    return tasks.filter(task => !tasks.complete).length;
+    return tasks.filter(task => !task.complete).length;
   }
 
-  // Example data for upcoming tasks
-  const upcomingTasks = [
-    { id: '1', name: 'Design UI for feature X', dueDate: '2024-11-15' },
-    { id: '2', name: 'Prepare Presentation for team', dueDate: '2024-11-16' },
-    { id: '3', name: 'Code Review for project Y', dueDate: '2024-11-17' },
-  ];
+  // Replace the static upcomingTasks with a state and loading function
+  const [upcomingTasks, setUpcomingTasks] = useState([]);
+
+  // Add this function to load tasks
+  const loadUpcomingTasks = async () => {
+    try {
+      const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
+      if (storedTasks) {
+        const allTasks = JSON.parse(storedTasks);
+        const upcoming = allTasks
+          .filter(task => !task.complete)
+          .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+          .slice(0, 5); // Show only 5 most recent tasks
+        setUpcomingTasks(upcoming);
+      }
+    } catch (error) {
+      console.error('Error loading upcoming tasks:', error);
+    }
+  };
+
+  // Add useEffect to load tasks
+  useEffect(() => {
+    loadUpcomingTasks();
+  }, []);
 
   // Function to toggle between modes
   const toggleMode = (value) => {
@@ -122,26 +141,39 @@ export default function HomeScreen({ onCreateTask }) {
         <FlatList
           data={upcomingTasks}
           renderItem={({ item }) => (
-            <View style={styles.taskCard}>
+            <View style={[
+              styles.taskCard,
+              item.isPriority && styles.priorityTaskCard
+            ]}>
               <View style={styles.taskHeader}>
                 <TouchableOpacity
                   style={styles.roundCheckbox}
-                  onPress={() => router.push('/tabs/game')}
+                  onPress={() => router.push({
+                    pathname: 'tabs/projects/taskView',
+                    params: { ...item }
+                  })}
                 />
                 <View style={styles.taskContent}>
-                  <Text style={styles.taskName}>{item.name}</Text>
+                  <Text style={styles.taskName}>{item.title}</Text>
                   <View style={styles.dueDateContainer}>
                     <MaterialCommunityIcons
                       name="calendar-month-outline"
-                      size={18}
-                      color="#6B6B6B"
+                      size={16}
+                      color="#666"
                     />
-                    <Text style={{ marginLeft: 4 }}>Due: {item.dueDate}</Text>
+                    <Text style={styles.dateText}>
+                      Due: {new Date(item.dueDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
+                    </Text>
                   </View>
                 </View>
-                <TouchableOpacity style={styles.taskEditButton}>
-                  <Text>...</Text>
-                </TouchableOpacity>
+                {item.isPriority && (
+                  <MaterialCommunityIcons
+                    name="flag"
+                    size={18}
+                    color="red"
+                    style={styles.flagIcon}
+                  />
+                )}
               </View>
             </View>
           )}
@@ -196,21 +228,51 @@ const styles = StyleSheet.create({
     borderRadius: 4
   },
   progressText: { marginLeft: 8, fontSize: 12, color: '#333' },
-  taskCard: { padding: 16, marginBottom: 8, backgroundColor: '#f0f0f0', borderRadius: 8 },
-  taskHeader: { flexDirection: 'row', alignItems: 'center' },
+  taskCard: {
+    padding: 12,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+  },
+  priorityTaskCard: {
+    backgroundColor: '#fff3cd',
+  },
+  taskHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
   roundCheckbox: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     borderWidth: 2,
     borderColor: '#888',
-    borderRadius: 12,
-    marginRight: 8,
+    borderRadius: 10,
+    marginRight: 12,
   },
-  taskContent: { flex: 1 },
-  taskName: { fontSize: 16, fontWeight: 'bold' },
-  dueDateContainer: { flexDirection: 'row', alignItems: 'center' },
-  taskEditButton: { padding: 4 },
-  
+  taskContent: {
+    flex: 1,
+  },
+  taskName: {
+    fontSize: 15,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  dueDateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    color: '#666',
+    fontSize: 13,
+    marginLeft: 4,
+  },
+  flagIcon: {
+    marginLeft: 8,
+  },
 });
 
 
