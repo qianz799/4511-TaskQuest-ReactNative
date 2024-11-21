@@ -1,10 +1,12 @@
 import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import TaskSummary from "../../../components/taskSummary";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CreateTask from './createTask'; // Import the CreateTask component
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 // Add at the top with other constants
 const TASKS_KEY = '@tasks';
@@ -15,6 +17,7 @@ export default function ProjectView() {
   const navigation = useNavigation();
   const [taskData, setTaskData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const toggleStatus = (id) => {
     setTaskData(taskData.map(task => {
@@ -25,10 +28,6 @@ export default function ProjectView() {
     }))
   }
 
-  useLayoutEffect(() => {
-    navigation.setOptions({title: title})
-  }, [navigation])
-
   const loadTasks = async () => {
     try {
       const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
@@ -37,17 +36,10 @@ export default function ProjectView() {
       
       // Sort tasks by priority and due date
       const sortedTasks = projectTasks.sort((a, b) => {
-        // Prioritize priority items
         if (a.isPriority && !b.isPriority) return -1;
         if (!a.isPriority && b.isPriority) return 1;
-
-        // For items with same priority status, sort by due date
         if (a.dueDate && b.dueDate) {
           return new Date(a.dueDate) - new Date(b.dueDate);
-        } else if (a.dueDate) {
-          return -1;
-        } else if (b.dueDate) {
-          return 1;
         }
         return 0;
       });
@@ -63,10 +55,37 @@ export default function ProjectView() {
     loadTasks();
   };
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
+      loadTasks();
+    }, [id])
+  );
+
+  const handleTaskUpdate = () => {
+    setLastUpdated(new Date());
     loadTasks();
-  }, [])
- 
+  };
+
+  const deleteTask = async (taskId) => {
+    try {
+      // Get current tasks
+      const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
+      const allTasks = JSON.parse(storedTasks);
+      
+      // Filter out the deleted task
+      const updatedTasks = allTasks.filter(task => task.id !== taskId);
+      
+      // Save back to storage
+      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
+      
+      // Update local state
+      setTaskData(taskData.filter(task => task.id !== taskId));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task');
+    }
+  };
+
   return (
 <View style={styles.container}>
 <View style={styles.header}>
@@ -91,6 +110,9 @@ export default function ProjectView() {
               complete={item.complete} 
               isPriority={item.isPriority}
               toggleStatus={toggleStatus}
+              projectId={id}
+              onUpdate={handleTaskUpdate}
+              onDelete={deleteTask}
             />
           )}
         />
@@ -100,7 +122,7 @@ export default function ProjectView() {
 </View>
 <FlatList
           data={taskData.filter(task => task.complete)}
-          renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus}/>
+          renderItem={({ item }) => ( <TaskSummary id={item.id} title={item.title} description={item.description} dueDate={item.dueDate} complete={item.complete} toggleStatus={toggleStatus} onDelete={deleteTask}/>
           )}
 />
 </View>
