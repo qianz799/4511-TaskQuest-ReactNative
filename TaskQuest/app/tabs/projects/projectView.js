@@ -7,9 +7,18 @@ import CreateTask from './createTask'; // Import the CreateTask component
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import { StorageService, STORAGE_KEYS } from '../../services/storageService';
 
 // Add at the top with other constants
 const TASKS_KEY = '@tasks';
+
+const NotificationTypes = {
+  TASK_COMPLETION: 'task_completion',
+  TASK_OVERDUE: 'task_overdue',
+  TASK_ASSIGNED: 'task_assigned',
+  PROJECT_ADDED: 'project_added',
+  MEETING_REMINDER: 'meeting_reminder'
+};
 
 export default function ProjectView() {
   const { id, title, description, tasks, gamification } = useLocalSearchParams();
@@ -19,14 +28,42 @@ export default function ProjectView() {
   const [modalVisible, setModalVisible] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  const toggleStatus = (id) => {
-    setTaskData(taskData.map(task => {
-      if (task.id === id) {
-        return {...task, complete: !task.complete}
-      }
-      return task;
-    }))
-  }
+  const addNotification = async (notification) => {
+    await StorageService.update(STORAGE_KEYS.NOTIFICATIONS, (notifications = []) => [{
+      id: Date.now().toString(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      read: false,
+      projectId: id,
+      ...notification
+    }, ...notifications]);
+  };
+
+  const toggleStatus = async (taskId) => {
+    try {
+      const updatedTasks = taskData.map(task => {
+        if (task.id === taskId) {
+          const newStatus = !task.complete;
+          
+          // Add completion notification
+          if (newStatus) {
+            addNotification({
+              type: NotificationTypes.TASK_COMPLETION,
+              title: `Task "${task.title}" completed`,
+              subtitle: 'See more'
+            });
+          }
+          
+          return {...task, complete: newStatus};
+        }
+        return task;
+      });
+      
+      await StorageService.set(STORAGE_KEYS.TASKS, updatedTasks);
+      setTaskData(updatedTasks);
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
+  };
 
   const loadTasks = async () => {
     try {
@@ -85,6 +122,33 @@ export default function ProjectView() {
       alert('Failed to delete task');
     }
   };
+
+  // Check for overdue tasks
+  useEffect(() => {
+    const checkOverdueTasks = async () => {
+      const now = new Date();
+      const overdueTasks = taskData.filter(task => {
+        const dueDate = new Date(task.dueDate);
+        return !task.complete && dueDate < now && !task.notifiedOverdue;
+      });
+
+      for (const task of overdueTasks) {
+        await addNotification({
+          type: NotificationTypes.TASK_OVERDUE,
+          title: `Task "${task.title}" is overdue`,
+          subtitle: `Due date was ${new Date(task.dueDate).toLocaleDateString()}`,
+        });
+
+        // Mark task as notified
+        await StorageService.update(STORAGE_KEYS.TASKS, tasks =>
+          tasks.map(t => t.id === task.id ? {...t, notifiedOverdue: true} : t)
+        );
+      }
+    };
+
+    const interval = setInterval(checkOverdueTasks, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [taskData]);
 
   return (
 <View style={styles.container}>

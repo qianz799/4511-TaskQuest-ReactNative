@@ -1,10 +1,8 @@
 import { View, StyleSheet, Text } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import TaskForm from "../../../components/TaskForm";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StorageService, STORAGE_KEYS } from '../../services/storageService';
 import { useState } from 'react';
-
-const TASKS_KEY = '@tasks';
 
 export default function EditTask() {
   const router = useRouter();
@@ -13,25 +11,21 @@ export default function EditTask() {
   
   const handleSave = async (updatedTask) => {
     try {
-      const storedTasks = await AsyncStorage.getItem(TASKS_KEY);
-      const tasks = storedTasks ? JSON.parse(storedTasks) : [];
-      
-      const updatedTasks = tasks.map(task => 
-        task.id === params.id ? {
-          ...task,
-          ...updatedTask,
-          projectId: params.projectId,
-          id: params.id
-        } : task
+      await StorageService.update(STORAGE_KEYS.TASKS, tasks =>
+        tasks.map(task => 
+          task.id === params.id ? {
+            ...task,
+            ...updatedTask,
+            projectId: params.projectId,
+            id: params.id
+          } : task
+        )
       );
       
-      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
       setShowSuccess(true);
-      
       setTimeout(() => {
         router.back();
       }, 1500);
-      
     } catch (error) {
       console.error('Failed to update task:', error);
       alert('Failed to update task');

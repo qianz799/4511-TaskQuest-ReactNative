@@ -1,36 +1,85 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Image } from "react-native";
-import { useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput } from "react-native";
+import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { StorageService, STORAGE_KEYS } from '../services/storageService';
+import { useRouter } from "expo-router";
 
-// Mock data - replace with your actual data source
-const NOTIFICATIONS = [
-  {
-    id: '1',
-    type: 'task_completion',
-    title: 'Marianne completed a task',
-    subtitle: 'See more',
-    timestamp: '11:33 am',
-  },
-  // ... add more notifications
-];
+const NotificationTypes = {
+  TASK_COMPLETION: 'task_completion',
+  TASK_OVERDUE: 'task_overdue',
+  TASK_ASSIGNED: 'task_assigned',
+  PROJECT_ADDED: 'project_added',
+  MEETING_REMINDER: 'meeting_reminder'
+};
 
 export default function InboxScreen() {
+  const [notifications, setNotifications] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
+  const router = useRouter();
 
-  const filteredNotifications = NOTIFICATIONS.filter(notification => {
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadNotifications = async () => {
+    const stored = await StorageService.get(STORAGE_KEYS.NOTIFICATIONS) || [];
+    setNotifications(stored);
+  };
+
+  const handleNotificationPress = async (notification) => {
+    // Mark as read
+    await StorageService.update(STORAGE_KEYS.NOTIFICATIONS, notifications =>
+      notifications.map(n => n.id === notification.id ? {...n, read: true} : n)
+    );
+
+    // Navigate if has projectId
+    if (notification.projectId) {
+      router.push({
+        pathname: '/tabs/projects/projectView',
+        params: { id: notification.projectId }
+      });
+    }
+  };
+
+  const getNotificationStyle = (type) => {
+    switch(type) {
+      case NotificationTypes.TASK_OVERDUE:
+        return styles.overdueNotification;
+      case NotificationTypes.TASK_COMPLETION:
+        return styles.completionNotification;
+      case NotificationTypes.PROJECT_ADDED:
+        return styles.projectNotification;
+      default:
+        return null;
+    }
+  };
+
+  const filteredNotifications = notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || notification.type === filter;
-    return matchesSearch && matchesFilter;
+    
+    switch(filter) {
+      case 'task':
+        return matchesSearch && [NotificationTypes.TASK_COMPLETION, NotificationTypes.TASK_OVERDUE, NotificationTypes.TASK_ASSIGNED].includes(notification.type);
+      case 'project':
+        return matchesSearch && notification.type === NotificationTypes.PROJECT_ADDED;
+      case 'reminder':
+        return matchesSearch && [NotificationTypes.MEETING_REMINDER, NotificationTypes.TASK_OVERDUE].includes(notification.type);
+      default:
+        return matchesSearch;
+    }
   });
 
   const renderNotification = ({ item }) => (
-    <TouchableOpacity style={styles.notificationItem}>
-      {item.avatar && (
-        <View style={styles.avatar}>
-          <Image source={item.avatar} style={styles.avatarImage} />
-        </View>
-      )}
+    <TouchableOpacity 
+      style={[
+        styles.notificationItem,
+        getNotificationStyle(item.type)
+      ]}
+      onPress={() => handleNotificationPress(item)}
+    >
       <View style={styles.notificationContent}>
         <Text style={styles.title}>{item.title}</Text>
         {item.subtitle && <Text style={styles.subtitle}>{item.subtitle}</Text>}
@@ -38,6 +87,11 @@ export default function InboxScreen() {
       <Text style={styles.timestamp}>{item.timestamp}</Text>
     </TouchableOpacity>
   );
+
+  const clearAllNotifications = async () => {
+    await StorageService.set(STORAGE_KEYS.NOTIFICATIONS, []);
+    setNotifications([]);
+  };
 
   return (
     <View style={styles.container}>
@@ -74,6 +128,13 @@ export default function InboxScreen() {
           <Text>Reminders</Text>
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity 
+        style={styles.clearButton}
+        onPress={clearAllNotifications}
+      >
+        <Text style={styles.clearButtonText}>Clear All</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={filteredNotifications}
@@ -129,17 +190,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 12,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-  },
   notificationContent: {
     flex: 1,
   },
@@ -158,4 +208,27 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
+  overdueNotification: {
+    backgroundColor: '#fff0f0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff4444',
+  },
+  completionNotification: {
+    backgroundColor: '#f0fff0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
+  },
+  projectNotification: {
+    backgroundColor: '#f0f0ff',
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  clearButton: {
+    padding: 8,
+    marginRight: 16,
+  },
+  clearButtonText: {
+    color: '#ff4444',
+    fontSize: 14,
+  }
 });
