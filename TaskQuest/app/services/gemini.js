@@ -19,7 +19,7 @@ const MOCK_RESPONSE = [
 ];
 
 export const generateTaskBreakdown = async (prompt) => {
-  const USE_MOCK = true; // change to false to use API
+  const USE_MOCK = false; // change to false to use API
 
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 1000));
